@@ -1,8 +1,17 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <vector>
 
 using namespace std;
+
+struct Adresat {
+    int idAdresata, idPrzypisanegoUzytkownika;
+    string imie, nazwisko, numerTelefonu, adres, email;
+
+    Adresat(int idAdresata = 0, int idUzytkownika = 0, string imie = "", string nazwisko = "", string telefon = "", string adres = "", string email = "")
+        : idAdresata(idAdresata), idPrzypisanegoUzytkownika(idUzytkownika), imie(imie), nazwisko(nazwisko), numerTelefonu(telefon), adres(adres), email(email) {}
+};
 
 string wczytajTekst() {
     string tekst = "";
@@ -93,6 +102,8 @@ void wyloguj()    {
 }
 
 int main() {
+    vector <Adresat> adresaci;
+
     while(true)    {
         wyswietlMenuUzytkownika();
         char wyborUzytkownika = wczytajLiczbe();
