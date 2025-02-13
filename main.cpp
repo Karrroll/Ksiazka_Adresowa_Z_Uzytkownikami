@@ -52,6 +52,22 @@ int wczytajLiczbe() {
     }
 }
 
+string wczytajTekstDozwoloneZnaki(const string &komentarz) {
+    string tekst = "";
+
+    while(true) {
+        cout << komentarz;
+        tekst = wczytajTekst();
+
+        if(tekst.find("|") != string::npos)
+            cout << endl << "Nie mozna uzywac znaku '|'. Sprobuj ponownie!" << endl;
+        else if((tekst.front() == ' ') || (tekst.back() == ' '))
+            cout << endl << "Pierwszy oraz ostatni znak nie moga byc spacja" << endl;
+        else
+            return tekst;
+    }
+}
+
 void wstrzymajProgram() {
     cout << "Wcisnij Enter, aby kontynuowac...";
     cin.get();
@@ -127,17 +143,13 @@ void zarejestrujNowegoUzytkownika(vector <Uzytkownik> &uzytkownicy) {
     cout << "REJESTRACJA" << endl;
     cout << "----------------------" << endl;
 
-    cout << "Nazwa Uzytkownika: ";
-    loginNowegoUzytkownika = wczytajTekst();
-
+    loginNowegoUzytkownika = wczytajTekstDozwoloneZnaki("Nazwa Uzytkownika: ");
     idUzytkownika = pobierzIdUzytkownika(uzytkownicy, loginNowegoUzytkownika);
 
     if(idUzytkownika == 0) {
         nowyUzytkownik.idUzytkownika = wyznaczIdNowemuUzytkownikowi(uzytkownicy);
         nowyUzytkownik.loginUzytkownika = loginNowegoUzytkownika;
-
-        cout << "Haslo: ";
-        nowyUzytkownik.hasloUzytkownika = wczytajTekst();
+        nowyUzytkownik.hasloUzytkownika = wczytajTekstDozwoloneZnaki("Haslo: ");
 
         if(dodajNowegoUzytkownikaDoPlikuTekstowego(nowyUzytkownik))
             uzytkownicy.emplace_back(nowyUzytkownik);
