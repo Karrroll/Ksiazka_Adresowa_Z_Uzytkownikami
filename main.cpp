@@ -13,6 +13,10 @@ struct Adresat {
 
     Adresat(int idAdresata = 0, int idUzytkownika = 0, string imie = "", string nazwisko = "", string telefon = "", string adres = "", string email = "")
         : idAdresata(idAdresata), idPrzypisanegoUzytkownika(idUzytkownika), imie(imie), nazwisko(nazwisko), numerTelefonu(telefon), adres(adres), email(email) {}
+
+    bool operator == (const Adresat &porownaj) const {
+        return (imie == porownaj.imie) && (nazwisko == porownaj.nazwisko) && (numerTelefonu == porownaj.numerTelefonu) && (adres == porownaj.adres) && (email == porownaj.email);
+    }
 };
 
 string wczytajTekst() {
@@ -100,12 +104,30 @@ void wyswietlMenuUzytkownika() {
     cout << "Wybierz jedna z opcji:\t";
 }
 
+void wyswietlMenuEdycji() {
+    cout << "Wybierz dane do edycji:\t"         << endl;
+    cout << "1 - Imie"                          << endl;
+    cout << "2 - Nazwisko"                      << endl;
+    cout << "3 - Numer Telefonu"                << endl;
+    cout << "4 - Email"                         << endl;
+    cout << "5 - Adres"                         << endl;
+    cout << "6 - Powrot do Menu Uzytkownika"    << endl << endl;
+}
+
 void wyswietlDaneAdresata(const vector <Adresat> :: iterator &adresat) {
     cout << "Numer ID:\t\t"         << adresat->idAdresata                          << endl;
     cout << "Imie i Nazwisko:\t"    << adresat->imie << " " << adresat->nazwisko    << endl;
     cout << "nr. telefonu:\t\t"     << adresat->numerTelefonu                       << endl;
     cout << "Email:\t\t\t"          << adresat->email                               << endl;
     cout << "Adres:\t\t\t"          << adresat->adres                               << endl << endl;
+}
+
+auto znajdzAdresataPoId(vector <Adresat> &adresaci, const int numerId) {
+    for (auto itr = adresaci.begin(); itr != adresaci.end(); itr++) {
+        if (itr->idAdresata == numerId)
+            return itr;
+    }
+    return adresaci.end();
 }
 
 Adresat przypiszDaneAdresatowi(const string &odczytywanaLinia) {
@@ -328,10 +350,178 @@ void wyswietlWszystkichAdresatow(vector <Adresat> &adresaci) {
     wstrzymajProgram();
 }
 
-void edytujAdresata()    {
+bool zastapPlikTekstowy(const string &nazwaPlikuPrzedZmianami, const string &nazwaPlikuPoZmianach) {
+
+    if (remove(nazwaPlikuPrzedZmianami.c_str()) == 0 && rename(nazwaPlikuPoZmianach.c_str(), nazwaPlikuPrzedZmianami.c_str()) == 0) {
+        return true;
+    } else {
+        cout << "Blad podczas nadpisywania pliku tekstowego." << endl;
+        return false;
+    }
 }
 
-void usunAdresata()    {
+bool zaktualizujPlikZAdresatami(const Adresat &modyfikowanyAdresat, const string &kryterium) {
+    string wczytanaLinia = "";
+    fstream oryginalnyPlik, zaktualizowanyPlik;
+    Adresat wczytanyAdresat;
+
+    oryginalnyPlik.open("Adresaci.txt", ios::in);
+    zaktualizowanyPlik.open("Adresaci_TYMCZASOWY.txt", ios::out | ios::app);
+
+    if (oryginalnyPlik.good() && zaktualizowanyPlik.good()) {
+
+        while(getline(oryginalnyPlik, wczytanaLinia)) {
+            wczytanyAdresat = przypiszDaneAdresatowi(wczytanaLinia);
+
+            if(wczytanyAdresat.idAdresata != modyfikowanyAdresat.idAdresata)
+                zaktualizowanyPlik << wczytanaLinia << endl;
+            else if(wczytanyAdresat.idAdresata == modyfikowanyAdresat.idAdresata && kryterium == "EDYTUJ")
+                zaktualizowanyPlik << daneAdresataJednaLinia(modyfikowanyAdresat) << endl;
+            else if(wczytanyAdresat.idAdresata == modyfikowanyAdresat.idAdresata && kryterium == "USUN")
+                continue;
+
+        }
+        oryginalnyPlik.close();
+        zaktualizowanyPlik.close();
+
+        if(zastapPlikTekstowy("Adresaci.txt", "Adresaci_TYMCZASOWY.txt"))
+            return true;
+    }
+
+    return false;
+}
+
+Adresat wprowadzZmianyEdycjaAdresata(const vector <Adresat> :: iterator oryginalnyAdresat, const int wybor) {
+    string wprowadzanaZmiana = "";
+    Adresat edytowanyAdresat = *oryginalnyAdresat;
+
+    system("cls");
+    wprowadzanaZmiana = wczytajTekstDozwoloneZnaki("Wprowadz zmiane:\t");
+
+    switch (wybor) {
+        case 1: edytowanyAdresat.imie = wprowadzanaZmiana;              break;
+        case 2: edytowanyAdresat.nazwisko = wprowadzanaZmiana;          break;
+        case 3: edytowanyAdresat.numerTelefonu = wprowadzanaZmiana;     break;
+        case 4: edytowanyAdresat.email = wprowadzanaZmiana;             break;
+        case 5: edytowanyAdresat.adres = wprowadzanaZmiana;             break;
+    }
+
+    return edytowanyAdresat;
+}
+
+Adresat edytujWybranegoAdresata(const vector <Adresat> :: iterator &oryginalnyAdresat) {
+    int wyborUzytkownika = 0;
+    Adresat edytowanyAdresat;
+
+    cout << "Twoj wybor: ";
+    wyborUzytkownika = wczytajLiczbe();
+
+    while(true) {
+        if(wyborUzytkownika == 6) {
+            return *oryginalnyAdresat;
+        } else if(wyborUzytkownika >= 0 && wyborUzytkownika <= 5) {
+            edytowanyAdresat = wprowadzZmianyEdycjaAdresata(oryginalnyAdresat, wyborUzytkownika);
+
+            if(edytowanyAdresat == *oryginalnyAdresat) {
+                cout << endl << "Proponowana zmiana jest taka sama. Sprobuj ponownie." << endl;
+                wstrzymajProgram();
+            } else
+                return edytowanyAdresat;
+
+        } else
+            cout << endl << "Niepoprawny wybor! Sprobuj ponownie." << endl;
+    }
+}
+
+void edytujAdresata(vector <Adresat> &adresaci) {
+    system("cls");
+    int numerId = 0;
+    vector <Adresat> :: iterator edytowanyAdresat;
+    Adresat adresatPoEdycji;
+
+    cout << "\t< EDYTUJ ADRESATA >" << endl;
+    cout << "-----------------------------------" << endl << endl;
+
+    if (!adresaci.empty()) {
+        cout << "Wprowadz numer ID adresata do edycji:\t";
+        numerId = wczytajLiczbe();
+
+        edytowanyAdresat = znajdzAdresataPoId(adresaci, numerId);
+
+        if(edytowanyAdresat != adresaci.end()) {
+            cout << endl << "Wybrany adresat:" << endl;
+            wyswietlDaneAdresata(edytowanyAdresat);
+
+            wyswietlMenuEdycji();
+            adresatPoEdycji = edytujWybranegoAdresata(edytowanyAdresat);
+
+            if(adresatPoEdycji == *edytowanyAdresat) {
+                return;
+            }
+             else {
+                if(zaktualizujPlikZAdresatami(adresatPoEdycji, "EDYTUJ")) {
+                    *edytowanyAdresat = adresatPoEdycji;
+                    cout << endl << "Zapisano zmiany!" << endl;
+                }
+            }
+        } else
+            cout << endl << "Nie znaleziono adresata o takim numerze ID!" << endl;
+    } else
+        cout << "Ksiazka Adresowa jest pusta!" << endl;
+
+    wstrzymajProgram();
+}
+
+void usunWybranegoAdresata(vector <Adresat> &adresaci, const vector <Adresat> :: iterator &adresatDoUsuniecia) {
+    char znak;
+    Adresat adresataDoUsunieciaKopia;
+
+    cout << "Czy napewno chcesz usunac wybranego Adresata?(t/n): ";
+    while (true) {
+        znak = wczytajZnak();
+        switch(znak) {
+            case 't':
+                adresataDoUsunieciaKopia = *adresatDoUsuniecia;
+
+                if(zaktualizujPlikZAdresatami(adresataDoUsunieciaKopia, "USUN")) {
+                    adresaci.erase(adresatDoUsuniecia);
+                    cout << endl << "Wybrany adresat zostal usuniety!" << endl;
+                }
+                return;
+            case 'n':
+                cout << endl << "Wybrany adresat NIE zostal usuniety!" << endl;
+                return;
+            default:
+                cout << endl << "Wpisz t lub n!: ";
+        }
+    }
+}
+
+void usunAdresata(vector <Adresat> &adresaci) {
+    system("cls");
+    int numerId = 0;
+    vector <Adresat> :: iterator adresatDoUsuniecia;
+
+    cout << "\t< USUN ADRESATA >" << endl;
+    cout << "---------------------------------" << endl << endl;
+
+    if (!adresaci.empty()) {
+        cout << "Wprowadz numer ID adresata do usuniecia:\t";
+        numerId = wczytajLiczbe();
+
+        adresatDoUsuniecia = znajdzAdresataPoId(adresaci, numerId);
+
+        if(adresatDoUsuniecia != adresaci.end()) {
+            cout << endl << "Wybrany adresat:" << endl;
+            wyswietlDaneAdresata(adresatDoUsuniecia);
+
+            usunWybranegoAdresata(adresaci, adresatDoUsuniecia);
+        } else
+            cout << endl << "Nie znaleziono adresata o takim numerze ID!" << endl;
+    } else
+        cout << "Ksiazka Adresowa jest pusta!" << endl << endl;
+
+    wstrzymajProgram();
 }
 
 void zmienHaslo()    {
@@ -366,10 +556,10 @@ int idZalogowanegoUzytkownika = 1;        // wpisz ID. Docelowo bedzie generowan
                 wyswietlWszystkichAdresatow(adresaci);
                 break;
             case 5:
-                edytujAdresata();
+                edytujAdresata(adresaci);
                 break;
             case 6:
-                usunAdresata();
+                usunAdresata(adresaci);
                 break;
             case 8:
                 zmienHaslo();
