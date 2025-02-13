@@ -1,8 +1,17 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <vector>
 
 using namespace std;
+
+struct Adresat {
+    int idAdresata, idPrzypisanegoUzytkownika;
+    string imie, nazwisko, numerTelefonu, adres, email;
+
+    Adresat(int idAdresata = 0, int idUzytkownika = 0, string imie = "", string nazwisko = "", string telefon = "", string adres = "", string email = "")
+        : idAdresata(idAdresata), idPrzypisanegoUzytkownika(idUzytkownika), imie(imie), nazwisko(nazwisko), numerTelefonu(telefon), adres(adres), email(email) {}
+};
 
 string wczytajTekst() {
     string tekst = "";
@@ -68,6 +77,14 @@ void wyswietlMenuUzytkownika() {
     cout << "Wybierz jedna z opcji:\t";
 }
 
+void wyswietlDaneAdresata(const vector <Adresat> :: iterator &adresat) {
+    cout << "Numer ID:\t\t"         << adresat->idAdresata                          << endl;
+    cout << "Imie i Nazwisko:\t"    << adresat->imie << " " << adresat->nazwisko    << endl;
+    cout << "nr. telefonu:\t\t"     << adresat->numerTelefonu                       << endl;
+    cout << "Email:\t\t\t"          << adresat->email                               << endl;
+    cout << "Adres:\t\t\t"          << adresat->adres                               << endl << endl;
+}
+
 void dodajAdresata()    {
 }
 
@@ -77,7 +94,21 @@ void wyszukajAdresataPoImieniu()    {
 void wyszukajAdresataPoNazwisku()    {
 }
 
-void wyswietlWszystkichAdresatow()    {
+void wyswietlWszystkichAdresatow(vector <Adresat> &adresaci) {
+    system("cls");
+    cout << "\t< WSZYSCY ADRESACI >"                << endl;
+    cout << "------------------------------------"  << endl;
+
+    if (!adresaci.empty()) {
+        cout << endl << "Liczba Adresatow: " << adresaci.size() << endl << endl;
+
+        for (auto itr = adresaci.begin(); itr != adresaci.end(); itr++)
+            wyswietlDaneAdresata(itr);
+
+    } else {
+        cout << endl << "Ksiazka adresowa jest pusta!" << endl;
+    }
+    wstrzymajProgram();
 }
 
 void edytujAdresata()    {
@@ -93,6 +124,8 @@ void wyloguj()    {
 }
 
 int main() {
+    vector <Adresat> adresaci;
+
     while(true)    {
         wyswietlMenuUzytkownika();
         char wyborUzytkownika = wczytajLiczbe();
@@ -108,7 +141,7 @@ int main() {
                 wyszukajAdresataPoNazwisku();
                 break;
             case 4:
-                wyswietlWszystkichAdresatow();
+                wyswietlWszystkichAdresatow(adresaci);
                 break;
             case 5:
                 edytujAdresata();
@@ -129,3 +162,4 @@ int main() {
     }
     return 0;
 }
+
