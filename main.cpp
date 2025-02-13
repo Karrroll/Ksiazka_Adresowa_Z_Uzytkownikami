@@ -22,7 +22,7 @@ struct Adresat {
     Adresat(int idAdresata = 0, int idUzytkownika = 0, string imie = "", string nazwisko = "", string telefon = "", string adres = "", string email = "")
         : idAdresata(idAdresata), idPrzypisanegoUzytkownika(idUzytkownika), imie(imie), nazwisko(nazwisko), numerTelefonu(telefon), adres(adres), email(email) {}
 
-    bool operator ==(const Adresat &porownaj) const {
+    bool operator == (const Adresat &porownaj) const {
         return (imie == porownaj.imie) && (nazwisko == porownaj.nazwisko) && (numerTelefonu == porownaj.numerTelefonu) && (adres == porownaj.adres) && (email == porownaj.email);
     }
 };
@@ -857,62 +857,16 @@ void przejdzDoMenuGlownego(vector <Uzytkownik> &uzytkownicy, int &idZalogowanego
 
 int main() {
     int idZalogowanegoUzytkownika = 0;
-    vector <Adresat> adresaci;
     vector <Uzytkownik> uzytkownicy;
+    vector <Adresat> adresaci;
 
     wczytajZarejestrowanychUzytkownikowDoWektora(uzytkownicy);
 
     while(true) {
-        while(idZalogowanegoUzytkownika == 0) {
-            int wyborUzytkownika = 0;
-
-            wyswietlMenuGlowne();
-            wyborUzytkownika = wczytajLiczbe();
-
-            switch(wyborUzytkownika) {
-                case 1: idZalogowanegoUzytkownika = zalogujUzytkownika(uzytkownicy);    break;
-                case 2: zarejestrujNowegoUzytkownika(uzytkownicy);                      break;
-                case 3: exit(0);
-                default:
-                    cout << endl << "Nieprawidlowy wybor!" << endl;
-            }
-        }
-
-        wczytajAdresatowUzytkownikaDoWektora(adresaci, idZalogowanegoUzytkownika);
-
-        while(idZalogowanegoUzytkownika != 0) {
-            wyswietlMenuUzytkownika();
-            char wyborUzytkownika = wczytajLiczbe();
-
-            switch (wyborUzytkownika) {
-                case 1:
-                    dodajAdresata(adresaci, idZalogowanegoUzytkownika);
-                    break;
-                case 2:
-                    wyszukajAdresataPoImieniu(adresaci);
-                    break;
-                case 3:
-                    wyszukajAdresataPoNazwisku(adresaci);
-                    break;
-                case 4:
-                    wyswietlWszystkichAdresatow(adresaci);
-                    break;
-                case 5:
-                    edytujAdresata(adresaci);
-                    break;
-                case 6:
-                    usunAdresata(adresaci);
-                    break;
-                case 8:
-                    zmienHaslo(uzytkownicy, idZalogowanegoUzytkownika);
-                    break;
-                case 9:
-                    wyloguj(idZalogowanegoUzytkownika);
-                    break;
-                default:
-                    cout << endl << "Nieprawidlowy wybor! Sprobuj ponownie." << endl;
-                    wstrzymajProgram();
-            }
+        if(idZalogowanegoUzytkownika == 0) {
+            przejdzDoMenuGlownego(uzytkownicy, idZalogowanegoUzytkownika);
+        } else {
+            przejdzDoMenuUzytkownika(uzytkownicy, adresaci, idZalogowanegoUzytkownika);
         }
     }
     return 0;
