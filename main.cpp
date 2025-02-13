@@ -3,6 +3,7 @@
 #include <sstream>
 #include <vector>
 #include <fstream>
+#include <algorithm>
 
 using namespace std;
 
@@ -70,6 +71,11 @@ string wczytajTekstDozwoloneZnaki(const string &komentarz) {
         else
             return tekst;
     }
+}
+
+string ignorujWilkoscLiter(string &tekst) {
+    transform(tekst.begin(), tekst.end(), tekst.begin(), ::tolower);
+    return tekst;
 }
 
 void wstrzymajProgram() {
@@ -251,10 +257,58 @@ void dodajAdresata(vector <Adresat> &adresaci, const int idZalogowanegoUzytkowni
     }
 }
 
-void wyszukajAdresataPoImieniu()    {
+void wypiszAdresatowWedlugKryterium(vector <Adresat> adresaci, string &szukanaWartosc, const string &kryterium) {
+    bool znalezionyAdresat = false;
+    string wartoscPorownywana = "";
+
+    for(auto itr = adresaci.begin(); itr != adresaci.end(); itr++) {
+        if(kryterium == "IMIE")
+            wartoscPorownywana = itr->imie;
+        else if(kryterium == "NAZWISKO")
+            wartoscPorownywana = itr->nazwisko;
+
+        if(ignorujWilkoscLiter(wartoscPorownywana) == ignorujWilkoscLiter(szukanaWartosc)) {
+            wyswietlDaneAdresata(itr);
+            znalezionyAdresat = true;
+        }
+    }
+    if (znalezionyAdresat == false)
+        cout << "Nie znaleziono adresata!" << endl;
 }
 
-void wyszukajAdresataPoNazwisku()    {
+void wyszukajAdresataPoImieniu(const vector <Adresat> &adresaci) {
+    system("cls");
+    string imieDoWyszukania = "";
+
+    cout << "\t< WYSZUKAJ PO IMIENIU >" << endl;
+    cout << "---------------------------------------" << endl;
+
+    if (!adresaci.empty()) {
+        cout << endl << "Wprowadz imie:\t\t";
+        imieDoWyszukania = wczytajTekst();
+        cout << endl;
+        wypiszAdresatowWedlugKryterium(adresaci, imieDoWyszukania, "IMIE");
+    } else {
+        cout << endl << "Ksiazka Adresowa jest pusta!" << endl;
+    }
+    wstrzymajProgram();
+}
+
+void wyszukajAdresataPoNazwisku(const vector <Adresat> &adresaci) {
+    system("cls");
+    string nazwiskoDoWyszukania = "";
+
+    cout << "\t< WYSZUKAJ PO NAZWISKU >" << endl;
+    cout << "----------------------------------------" << endl;
+    if (!adresaci.empty()) {
+        cout << "Wprowadz nazwisko:\t\t";
+        nazwiskoDoWyszukania = wczytajTekst();
+        cout << endl;
+        wypiszAdresatowWedlugKryterium(adresaci, nazwiskoDoWyszukania, "NAZWISKO");
+    } else {
+        cout << endl << "Ksiazka Adresowa jest pusta!" << endl;
+    }
+    wstrzymajProgram();
 }
 
 void wyswietlWszystkichAdresatow()    {
@@ -289,10 +343,10 @@ int idZalogowanegoUzytkownika = 1;        // wpisz ID. Docelowo bedzie generowan
                 dodajAdresata(adresaci, idZalogowanegoUzytkownika);
                 break;
             case 2:
-                wyszukajAdresataPoImieniu();
+                wyszukajAdresataPoImieniu(adresaci);
                 break;
             case 3:
-                wyszukajAdresataPoNazwisku();
+                wyszukajAdresataPoNazwisku(adresaci);
                 break;
             case 4:
                 wyswietlWszystkichAdresatow();
