@@ -53,6 +53,22 @@ int wczytajLiczbe() {
     }
 }
 
+string wczytajTekstDozwoloneZnaki(const string &komentarz) {
+    string tekst = "";
+
+    while(true) {
+        cout << komentarz;
+        tekst = wczytajTekst();
+
+        if(tekst.find("|") != string::npos)
+            cout << endl << "Nie mozna uzywac znaku '|'. Sprobuj ponownie!" << endl;
+        else if((tekst.front() == ' ') || (tekst.back() == ' '))
+            cout << endl << "Pierwszy oraz ostatni znak nie moga byc spacja" << endl;
+        else
+            return tekst;
+    }
+}
+
 void wstrzymajProgram() {
     cout << "Wcisnij Enter, aby kontynuowac...";
     cin.get();
@@ -116,8 +132,76 @@ void zalogujUzytkownika()    {
 
 }
 
-void zarejestrujNowegoUzytkownika() {
+string zamienDaneUzytkownikaNaTekst(const Uzytkownik &wskazanyUzytkownik) {
+    string daneUzytkownika = "";
 
+    daneUzytkownika += (to_string(wskazanyUzytkownik.idUzytkownika) + "|");
+    daneUzytkownika += (wskazanyUzytkownik.loginUzytkownika + "|");
+    daneUzytkownika += (wskazanyUzytkownik.hasloUzytkownika + "|");
+
+    return daneUzytkownika;
+}
+
+bool dodajNowegoUzytkownikaDoPlikuTekstowego(const Uzytkownik &nowyUzytkownik) {
+    string daneUzytkownikaJednaLinia = "";
+    fstream plikListaUzytkownikow;
+
+    plikListaUzytkownikow.open("Uzytkownicy.txt", ios::out | ios::app);
+
+    if(plikListaUzytkownikow.good()) {
+        daneUzytkownikaJednaLinia = zamienDaneUzytkownikaNaTekst(nowyUzytkownik);
+        plikListaUzytkownikow << daneUzytkownikaJednaLinia << endl;
+
+        cout << endl << "Uzytkownik " <<  nowyUzytkownik.loginUzytkownika << " zostal zarejestrowany pomyslnie" << endl;
+        wstrzymajProgram();
+        plikListaUzytkownikow.close();
+        return true;
+    } else {
+        cout << "Rejestracja zakonczona niepowodzeniem!" << endl;
+        wstrzymajProgram();
+        return false;
+    }
+}
+
+int wyznaczIdNowemuUzytkownikowi(const vector <Uzytkownik> &uzytkownicy) {
+    if(uzytkownicy.empty())
+        return 1;
+    else
+        return uzytkownicy.back().idUzytkownika + 1;
+}
+
+int pobierzIdUzytkownika(const vector <Uzytkownik> &uzytkownicy, const string &sprawdzanyLogin) {                               ///////// tttuuuutaj
+    for(auto wczytanyUzytkownik : uzytkownicy) {
+        if(wczytanyUzytkownik.loginUzytkownika == sprawdzanyLogin)
+            return wczytanyUzytkownik.idUzytkownika;
+    }
+    return 0;
+}
+
+void zarejestrujNowegoUzytkownika(vector <Uzytkownik> &uzytkownicy) {
+    system("cls");
+    int idUzytkownika = 0;
+    string loginNowegoUzytkownika = "";
+    Uzytkownik nowyUzytkownik;
+
+    cout << "REJESTRACJA" << endl;
+    cout << "----------------------" << endl;
+
+    loginNowegoUzytkownika = wczytajTekstDozwoloneZnaki("Nazwa Uzytkownika: ");
+    idUzytkownika = pobierzIdUzytkownika(uzytkownicy, loginNowegoUzytkownika);
+
+    if(idUzytkownika == 0) {
+        nowyUzytkownik.idUzytkownika = wyznaczIdNowemuUzytkownikowi(uzytkownicy);
+        nowyUzytkownik.loginUzytkownika = loginNowegoUzytkownika;
+        nowyUzytkownik.hasloUzytkownika = wczytajTekstDozwoloneZnaki("Haslo: ");
+
+        if(dodajNowegoUzytkownikaDoPlikuTekstowego(nowyUzytkownik))
+            uzytkownicy.emplace_back(nowyUzytkownik);
+
+    } else {
+        cout << endl << "Nazwa Uzytkownika juz istnieje!" << endl;
+        wstrzymajProgram();
+    }
 }
 
 int main() {
@@ -132,8 +216,8 @@ int main() {
         wyborUzytkownika = wczytajLiczbe();
 
         switch(wyborUzytkownika) {
-            case 1: zalogujUzytkownika();                break;
-            case 2: zarejestrujNowegoUzytkownika();      break;
+            case 1: zalogujUzytkownika();                           break;
+            case 2: zarejestrujNowegoUzytkownika(uzytkownicy);      break;
             case 3: exit(0);
             default:
                 cout << endl << "Nieprawidlowy wybor!" << endl;
