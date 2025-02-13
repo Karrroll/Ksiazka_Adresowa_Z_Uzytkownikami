@@ -677,7 +677,11 @@ void zmienHaslo(vector <Uzytkownik> &uzytkownicy, const int idUzytkownikaZmienia
     wstrzymajProgram();
 }
 
-void wyloguj()    {
+void wyloguj(int &idZalogowanegoUzytkownika) {
+    idZalogowanegoUzytkownika = 0;
+
+    cout << endl << "Zostales wylogowany!" << endl;
+    wstrzymajProgram();
 }
 
 int main() {
@@ -715,7 +719,7 @@ int idZalogowanegoUzytkownika = 1;        // wpisz ID. Docelowo bedzie generowan
                 zmienHaslo(uzytkownicy, idZalogowanegoUzytkownika);
                 break;
             case 9:
-                wyloguj();
+                wyloguj(idZalogowanegoUzytkownika);
                 break;
             default:
                 cout << endl << "Nieprawidlowy wybor! Sprobuj ponownie." << endl;
