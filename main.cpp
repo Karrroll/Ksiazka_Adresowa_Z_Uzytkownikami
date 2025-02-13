@@ -1,7 +1,16 @@
 #include <iostream>
+#include <string>
 #include <sstream>
 
 using namespace std;
+
+struct Uzytkownik {
+    int idUzytkownika;
+    string loginUzytkownika, hasloUzytkownika;
+
+    Uzytkownik(int id = 0, string login = "", string haslo = "")
+        : idUzytkownika(id), loginUzytkownika(login), hasloUzytkownika(haslo) {}
+};
 
 string wczytajTekst() {
     string tekst = "";
@@ -67,6 +76,7 @@ void zarejestrujNowegoUzytkownika() {
 }
 
 int main() {
+
     while(1)    {
         int wyborUzytkownika = 0;
 
