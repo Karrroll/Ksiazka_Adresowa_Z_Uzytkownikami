@@ -89,10 +89,17 @@ void usunAdresata()    {
 void zmienHaslo()    {
 }
 
-void wyloguj()    {
+void wyloguj(int &idZalogowanegoUzytkownika) {
+    idZalogowanegoUzytkownika = 0;
+
+    cout << endl << "Zostales wylogowany!" << endl;
+    wstrzymajProgram();
 }
 
 int main() {
+    cout << "Podaj ID: ";
+    int idZalogowanegoUzytkownika = 1;                      // Podaj Id ktore docolowo bedzie podawala aplikacja
+
     while(true)    {
         wyswietlMenuUzytkownika();
         char wyborUzytkownika = wczytajLiczbe();
@@ -120,7 +127,7 @@ int main() {
                 zmienHaslo();
                 break;
             case 9:
-                wyloguj();
+                wyloguj(idZalogowanegoUzytkownika);
                 break;
             default:
                 cout << endl << "Nieprawidlowy wybor! Sprobuj ponownie." << endl;
