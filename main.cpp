@@ -1,8 +1,18 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <vector>
+#include <algorithm>
 
 using namespace std;
+
+struct Adresat {
+    int idAdresata, idPrzypisanegoUzytkownika;
+    string imie, nazwisko, numerTelefonu, adres, email;
+
+    Adresat(int idAdresata = 0, int idUzytkownika = 0, string imie = "", string nazwisko = "", string telefon = "", string adres = "", string email = "")
+        : idAdresata(idAdresata), idPrzypisanegoUzytkownika(idUzytkownika), imie(imie), nazwisko(nazwisko), numerTelefonu(telefon), adres(adres), email(email) {}
+};
 
 string wczytajTekst() {
     string tekst = "";
@@ -46,6 +56,11 @@ int wczytajLiczbe() {
     }
 }
 
+string ignorujWilkoscLiter(string &tekst) {
+    transform(tekst.begin(), tekst.end(), tekst.begin(), ::tolower);
+    return tekst;
+}
+
 void wstrzymajProgram() {
     cout << "Wcisnij Enter, aby kontynuowac...";
     cin.get();
@@ -68,13 +83,69 @@ void wyswietlMenuUzytkownika() {
     cout << "Wybierz jedna z opcji:\t";
 }
 
+void wyswietlDaneAdresata(const vector <Adresat> :: iterator &adresat) {
+    cout << "Numer ID:\t\t"         << adresat->idAdresata                          << endl;
+    cout << "Imie i Nazwisko:\t"    << adresat->imie << " " << adresat->nazwisko    << endl;
+    cout << "nr. telefonu:\t\t"     << adresat->numerTelefonu                       << endl;
+    cout << "Email:\t\t\t"          << adresat->email                               << endl;
+    cout << "Adres:\t\t\t"          << adresat->adres                               << endl << endl;
+}
+
 void dodajAdresata()    {
 }
 
-void wyszukajAdresataPoImieniu()    {
+void wypiszAdresatowWedlugKryterium(vector <Adresat> adresaci, string &szukanaWartosc, const string &kryterium) {
+    bool znalezionyAdresat = false;
+    string wartoscPorownywana = "";
+
+    for(auto itr = adresaci.begin(); itr != adresaci.end(); itr++) {
+        if(kryterium == "IMIE")
+            wartoscPorownywana = itr->imie;
+        else if(kryterium == "NAZWISKO")
+            wartoscPorownywana = itr->nazwisko;
+
+        if(ignorujWilkoscLiter(wartoscPorownywana) == ignorujWilkoscLiter(szukanaWartosc)) {
+            wyswietlDaneAdresata(itr);
+            znalezionyAdresat = true;
+        }
+    }
+    if (znalezionyAdresat == false)
+        cout << "Nie znaleziono adresata!" << endl;
 }
 
-void wyszukajAdresataPoNazwisku()    {
+void wyszukajAdresataPoImieniu(const vector <Adresat> &adresaci) {
+    system("cls");
+    string imieDoWyszukania = "";
+
+    cout << "\t< WYSZUKAJ PO IMIENIU >" << endl;
+    cout << "---------------------------------------" << endl;
+
+    if (!adresaci.empty()) {
+        cout << endl << "Wprowadz imie:\t\t";
+        imieDoWyszukania = wczytajTekst();
+        cout << endl;
+        wypiszAdresatowWedlugKryterium(adresaci, imieDoWyszukania, "IMIE");
+    } else {
+        cout << endl << "Ksiazka Adresowa jest pusta!" << endl;
+    }
+    wstrzymajProgram();
+}
+
+void wyszukajAdresataPoNazwisku(const vector <Adresat> &adresaci) {
+    system("cls");
+    string nazwiskoDoWyszukania = "";
+
+    cout << "\t< WYSZUKAJ PO NAZWISKU >" << endl;
+    cout << "----------------------------------------" << endl;
+    if (!adresaci.empty()) {
+        cout << "Wprowadz nazwisko:\t\t";
+        nazwiskoDoWyszukania = wczytajTekst();
+        cout << endl;
+        wypiszAdresatowWedlugKryterium(adresaci, nazwiskoDoWyszukania, "NAZWISKO");
+    } else {
+        cout << endl << "Ksiazka Adresowa jest pusta!" << endl;
+    }
+    wstrzymajProgram();
 }
 
 void wyswietlWszystkichAdresatow()    {
@@ -93,6 +164,8 @@ void wyloguj()    {
 }
 
 int main() {
+    vector <Adresat> adresaci;
+
     while(true)    {
         wyswietlMenuUzytkownika();
         char wyborUzytkownika = wczytajLiczbe();
@@ -102,10 +175,10 @@ int main() {
                 dodajAdresata();
                 break;
             case 2:
-                wyszukajAdresataPoImieniu();
+                wyszukajAdresataPoImieniu(adresaci);
                 break;
             case 3:
-                wyszukajAdresataPoNazwisku();
+                wyszukajAdresataPoNazwisku(adresaci);
                 break;
             case 4:
                 wyswietlWszystkichAdresatow();
