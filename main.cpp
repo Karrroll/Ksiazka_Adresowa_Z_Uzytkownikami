@@ -12,6 +12,10 @@ struct Adresat {
 
     Adresat(int idAdresata = 0, int idUzytkownika = 0, string imie = "", string nazwisko = "", string telefon = "", string adres = "", string email = "")
         : idAdresata(idAdresata), idPrzypisanegoUzytkownika(idUzytkownika), imie(imie), nazwisko(nazwisko), numerTelefonu(telefon), adres(adres), email(email) {}
+
+    bool operator==(const Adresat &porownaj) const {
+        return (imie == porownaj.imie) && (nazwisko == porownaj.nazwisko) && (numerTelefonu == porownaj.numerTelefonu) && (adres == porownaj.adres) && (email == porownaj.email);
+    }
 };
 
 string wczytajTekst() {
