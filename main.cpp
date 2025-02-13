@@ -311,7 +311,21 @@ void wyszukajAdresataPoNazwisku(const vector <Adresat> &adresaci) {
     wstrzymajProgram();
 }
 
-void wyswietlWszystkichAdresatow()    {
+void wyswietlWszystkichAdresatow(vector <Adresat> &adresaci) {
+    system("cls");
+    cout << "\t< WSZYSCY ADRESACI >"                << endl;
+    cout << "------------------------------------"  << endl;
+
+    if (!adresaci.empty()) {
+        cout << endl << "Liczba Adresatow: " << adresaci.size() << endl << endl;
+
+        for (auto itr = adresaci.begin(); itr != adresaci.end(); itr++)
+            wyswietlDaneAdresata(itr);
+
+    } else {
+        cout << endl << "Ksiazka adresowa jest pusta!" << endl;
+    }
+    wstrzymajProgram();
 }
 
 void edytujAdresata()    {
@@ -349,7 +363,7 @@ int idZalogowanegoUzytkownika = 1;        // wpisz ID. Docelowo bedzie generowan
                 wyszukajAdresataPoNazwisku(adresaci);
                 break;
             case 4:
-                wyswietlWszystkichAdresatow();
+                wyswietlWszystkichAdresatow(adresaci);
                 break;
             case 5:
                 edytujAdresata();
@@ -370,3 +384,4 @@ int idZalogowanegoUzytkownika = 1;        // wpisz ID. Docelowo bedzie generowan
     }
     return 0;
 }
+
