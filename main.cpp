@@ -2,6 +2,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <fstream>
 
 using namespace std;
 
@@ -77,6 +78,54 @@ void wyswietlMenuUzytkownika() {
     cout << "Wybierz jedna z opcji:\t";
 }
 
+Adresat przypiszDaneAdresatowi(const string &odczytywanaLinia) {
+    int licznikPionowychKresek = 0;
+    Adresat wczytywanyAdresat;
+    string daneUzytkownika = "";
+
+    for(char znak : odczytywanaLinia) {
+        if(znak != '|') {
+            daneUzytkownika.push_back(znak);
+        } else {
+            licznikPionowychKresek++;
+            switch(licznikPionowychKresek) {
+                case 1:     wczytywanyAdresat.idAdresata = stoi(daneUzytkownika);                   break;
+                case 2:     wczytywanyAdresat.idPrzypisanegoUzytkownika = stoi(daneUzytkownika);    break;
+                case 3:     wczytywanyAdresat.imie = daneUzytkownika;                               break;
+                case 4:     wczytywanyAdresat.nazwisko = daneUzytkownika;                           break;
+                case 5:     wczytywanyAdresat.numerTelefonu = daneUzytkownika;                      break;
+                case 6:     wczytywanyAdresat.adres = daneUzytkownika;                              break;
+                case 7:     wczytywanyAdresat.email = daneUzytkownika;                              break;
+                default:
+                    cout << "Blad wczytywania. Dane Adresata nie moga zawierac znaku '|'. Ksiazka Adresowa zostanie zamknieta!" << endl;
+                    wstrzymajProgram();
+                    exit(1);
+            }
+            daneUzytkownika.clear();
+        }
+    }
+    return wczytywanyAdresat;
+}
+
+void wczytajAdresatowUzytkownikaDoWektora(vector <Adresat> &adresaci, const int idUzytkownika) {
+    string wczytanaLinia = "";
+    fstream plikListaAdresatow;
+    Adresat wczytanyAdresat;
+
+    plikListaAdresatow.open("Adresaci.txt", ios::in);
+
+    if (plikListaAdresatow.good()) {
+        while (getline(plikListaAdresatow, wczytanaLinia)) {
+            wczytanyAdresat = przypiszDaneAdresatowi(wczytanaLinia);
+
+            if(idUzytkownika == wczytanyAdresat.idPrzypisanegoUzytkownika)
+                adresaci.emplace_back(wczytanyAdresat);
+        }
+    }
+
+    plikListaAdresatow.close();
+}
+
 void dodajAdresata()    {
 }
 
@@ -103,6 +152,11 @@ void wyloguj()    {
 
 int main() {
     vector <Adresat> adresaci;
+
+cout << "Podaj ID: ";
+int idZalogowanegoUzytkownika = 1;        // wpisz ID. Docelowo bedzie generowane przez aplikacje
+
+    wczytajAdresatowUzytkownikaDoWektora(adresaci, idZalogowanegoUzytkownika);
 
     while(true)    {
         wyswietlMenuUzytkownika();
