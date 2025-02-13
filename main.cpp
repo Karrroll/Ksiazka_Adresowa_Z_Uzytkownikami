@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <vector>
+#include <fstream>
 
 using namespace std;
 
@@ -67,6 +69,49 @@ void wyswietlMenuGlowne() {
     cout << "Wybierz jedna z opcji:\t";
 }
 
+Uzytkownik przypiszDaneUzytkownikowi(const string &odczytywanaLinia) {
+    int licznikPionowychKresek = 0;
+    string daneUzytkownika = "";
+    Uzytkownik wczytywanyUzytkownik;
+
+    for(char znak : odczytywanaLinia) {
+        if(znak != '|') {
+            daneUzytkownika.push_back(znak);
+        } else {
+            licznikPionowychKresek++;
+            switch(licznikPionowychKresek) {
+                case 1: wczytywanyUzytkownik.idUzytkownika = stoi(daneUzytkownika);     break;
+                case 2: wczytywanyUzytkownik.loginUzytkownika = daneUzytkownika;        break;
+                case 3: wczytywanyUzytkownik.hasloUzytkownika = daneUzytkownika;        break;
+                default:
+                cout << "Blad wczytywania. Dane Uzytkownika nie moga zawierac znaku '|'. Ksiazka Adresowa zostanie zamknieta!" << endl;
+                wstrzymajProgram();
+                exit(1);
+            }
+            daneUzytkownika.clear();
+        }
+    }
+    return wczytywanyUzytkownik;
+}
+
+void wczytajZarejestrowanychUzytkownikowDoWektora(vector <Uzytkownik> &uzytkownicy) {
+    string wczytanaLinia = "";
+    fstream plikListaUzytkownikow;
+    Uzytkownik wczytanyUzytkownik;
+
+    plikListaUzytkownikow.open("Uzytkownicy.txt", ios::in);
+
+    if(plikListaUzytkownikow.good())    {
+        while(getline(plikListaUzytkownikow, wczytanaLinia)) {
+            wczytanyUzytkownik = przypiszDaneUzytkownikowi(wczytanaLinia);
+            uzytkownicy.emplace_back(wczytanyUzytkownik);
+        }
+    }
+
+    plikListaUzytkownikow.close();
+}
+
+
 void zalogujUzytkownika()    {
 
 }
@@ -76,6 +121,9 @@ void zarejestrujNowegoUzytkownika() {
 }
 
 int main() {
+    vector <Uzytkownik> uzytkownicy;
+
+    wczytajZarejestrowanychUzytkownikowDoWektora(uzytkownicy);
 
     while(1)    {
         int wyborUzytkownika = 0;
