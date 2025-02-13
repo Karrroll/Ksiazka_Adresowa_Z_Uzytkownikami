@@ -35,3 +35,6 @@
 *.depend
 *.layout
 *.cbp
+
+# Generated files
+Adresaci.txt 
