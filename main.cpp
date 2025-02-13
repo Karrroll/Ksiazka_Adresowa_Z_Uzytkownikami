@@ -85,6 +85,14 @@ void wyswietlMenuGlowne() {
     cout << "Wybierz jedna z opcji:\t";
 }
 
+auto znajdzUzytkownikaPoId(vector <Uzytkownik> &uzytkownicy, const int numerId) {
+    for (auto itr = uzytkownicy.begin(); itr != uzytkownicy.end(); itr++) {
+        if(itr->idUzytkownika == numerId)
+            return itr;
+    }
+    return uzytkownicy.end();
+}
+
 Uzytkownik przypiszDaneUzytkownikowi(const string &odczytywanaLinia) {
     int licznikPionowychKresek = 0;
     string daneUzytkownika = "";
@@ -127,11 +135,6 @@ void wczytajZarejestrowanychUzytkownikowDoWektora(vector <Uzytkownik> &uzytkowni
     plikListaUzytkownikow.close();
 }
 
-
-void zalogujUzytkownika()    {
-
-}
-
 string zamienDaneUzytkownikaNaTekst(const Uzytkownik &wskazanyUzytkownik) {
     string daneUzytkownika = "";
 
@@ -170,7 +173,7 @@ int wyznaczIdNowemuUzytkownikowi(const vector <Uzytkownik> &uzytkownicy) {
         return uzytkownicy.back().idUzytkownika + 1;
 }
 
-int pobierzIdUzytkownika(const vector <Uzytkownik> &uzytkownicy, const string &sprawdzanyLogin) {                               ///////// tttuuuutaj
+int pobierzIdUzytkownika(const vector <Uzytkownik> &uzytkownicy, const string &sprawdzanyLogin) {
     for(auto wczytanyUzytkownik : uzytkownicy) {
         if(wczytanyUzytkownik.loginUzytkownika == sprawdzanyLogin)
             return wczytanyUzytkownik.idUzytkownika;
@@ -204,20 +207,72 @@ void zarejestrujNowegoUzytkownika(vector <Uzytkownik> &uzytkownicy) {
     }
 }
 
+bool wprowadzHasloDlaUzytkownika(const vector <Uzytkownik> :: iterator &wybranyUzytkownik) {
+    int iloscProbLogowania = 3;
+    string haslo = "";
+
+    do {
+        cout << "Haslo: ";
+        haslo = wczytajTekst();
+
+        if(wybranyUzytkownik->hasloUzytkownika == haslo) {
+            cout << endl << "Uzytkownik " << wybranyUzytkownik->loginUzytkownika << " zalogowany!" << endl;
+            wstrzymajProgram();
+            return true;
+        } else {
+            cout << endl << "Niepoprawne haslo! Pozostalo prob: " << --iloscProbLogowania << endl;
+            wstrzymajProgram();
+            cout << endl;
+        }
+    }while(iloscProbLogowania > 0);
+
+    return false;
+}
+
+int zalogujUzytkownika(vector <Uzytkownik> &uzytkownicy) {
+    system("cls");
+    int idUzytkownika = 0;
+    string login = "";
+    vector <Uzytkownik> :: iterator znalezionyUzytkownik;
+
+    cout << "LOGOWANIE" << endl;
+    cout << "----------------------" << endl;
+
+    cout << "Nazwa Uzytkownika: ";
+    login = wczytajTekst();
+
+    idUzytkownika = pobierzIdUzytkownika(uzytkownicy, login);
+
+    if(idUzytkownika != 0) {
+        znalezionyUzytkownik = znajdzUzytkownikaPoId(uzytkownicy, idUzytkownika);
+
+        if(wprowadzHasloDlaUzytkownika(znalezionyUzytkownik))
+            return idUzytkownika;
+        else
+            idUzytkownika = 0;
+
+    } else {
+        cout << endl << "Podany uzytkownik nie istnieje!" << endl;
+        wstrzymajProgram();
+    }
+    return idUzytkownika;
+}
+
 int main() {
+    int idZalogowanegoUzytkownika = 0;
     vector <Uzytkownik> uzytkownicy;
 
     wczytajZarejestrowanychUzytkownikowDoWektora(uzytkownicy);
 
-    while(1)    {
+    while(1) {
         int wyborUzytkownika = 0;
 
         wyswietlMenuGlowne();
         wyborUzytkownika = wczytajLiczbe();
 
         switch(wyborUzytkownika) {
-            case 1: zalogujUzytkownika();                           break;
-            case 2: zarejestrujNowegoUzytkownika(uzytkownicy);      break;
+            case 1: idZalogowanegoUzytkownika = zalogujUzytkownika(uzytkownicy);    break;
+            case 2: zarejestrujNowegoUzytkownika(uzytkownicy);                      break;
             case 3: exit(0);
             default:
                 cout << endl << "Nieprawidlowy wybor!" << endl;
