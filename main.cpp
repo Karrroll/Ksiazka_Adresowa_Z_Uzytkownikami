@@ -25,7 +25,7 @@ struct Adresat {
     bool operator == (const Adresat &porownaj) const {
         return (imie == porownaj.imie) && (nazwisko == porownaj.nazwisko) && (numerTelefonu == porownaj.numerTelefonu) && (adres == porownaj.adres) && (email == porownaj.email);
     }
-}
+};
 
 string wczytajTekst() {
     string tekst = "";
@@ -573,16 +573,6 @@ void usunAdresata(vector <Adresat> &adresaci) {
         cout << "Ksiazka Adresowa jest pusta!" << endl << endl;
 
     wstrzymajProgram();
-}
-
-bool zastapPlikTekstowy(const string &nazwaPlikuPrzedZmianami, const string &nazwaPlikuPoZmianach) {
-
-    if (remove(nazwaPlikuPrzedZmianami.c_str()) == 0 && rename(nazwaPlikuPoZmianach.c_str(), nazwaPlikuPrzedZmianami.c_str()) == 0) {
-        return true;
-    } else {
-        cout << "Blad podczas nadpisywania pliku tekstowego." << endl;
-        return false;
-    }
 }
 
 bool zaktualizujPlikZUzytkownikami(const Uzytkownik &modyfikowanyUzytkownik) {
