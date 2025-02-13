@@ -56,6 +56,22 @@ int wczytajLiczbe() {
     }
 }
 
+string wczytajTekstDozwoloneZnaki(const string &komentarz) {
+    string tekst = "";
+
+    while(true) {
+        cout << komentarz;
+        tekst = wczytajTekst();
+
+        if(tekst.find("|") != string::npos)
+            cout << endl << "Nie mozna uzywac znaku '|'. Sprobuj ponownie!" << endl;
+        else if((tekst.front() == ' ') || (tekst.back() == ' '))
+            cout << endl << "Pierwszy oraz ostatni znak nie moga byc spacja" << endl;
+        else
+            return tekst;
+    }
+}
+
 void wstrzymajProgram() {
     cout << "Wcisnij Enter, aby kontynuowac...";
     cin.get();
@@ -76,6 +92,14 @@ void wyswietlMenuUzytkownika() {
     cout << "9. Wyloguj"                                            << endl;
     cout << "------------------------------------"                  << endl;
     cout << "Wybierz jedna z opcji:\t";
+}
+
+void wyswietlDaneAdresata(const vector <Adresat> :: iterator &adresat) {
+    cout << "Numer ID:\t\t"         << adresat->idAdresata                          << endl;
+    cout << "Imie i Nazwisko:\t"    << adresat->imie << " " << adresat->nazwisko    << endl;
+    cout << "nr. telefonu:\t\t"     << adresat->numerTelefonu                       << endl;
+    cout << "Email:\t\t\t"          << adresat->email                               << endl;
+    cout << "Adres:\t\t\t"          << adresat->adres                               << endl << endl;
 }
 
 Adresat przypiszDaneAdresatowi(const string &odczytywanaLinia) {
@@ -126,7 +150,105 @@ void wczytajAdresatowUzytkownikaDoWektora(vector <Adresat> &adresaci, const int 
     plikListaAdresatow.close();
 }
 
-void dodajAdresata()    {
+bool czyAdresatJuzIstnieje(vector <Adresat> &adresaci, const Adresat &sprawdzanyAdresat) {
+
+    for (vector <Adresat> :: iterator itr = adresaci.begin(); itr != adresaci.end(); itr++) {
+        if (itr->imie == sprawdzanyAdresat.imie && itr->nazwisko == sprawdzanyAdresat.nazwisko) {
+            cout << endl << "Podany adresat juz istnieje!" << endl;
+            wyswietlDaneAdresata(itr);
+            wstrzymajProgram();
+            return true;
+        }
+    }
+    return false;
+}
+
+string daneAdresataJednaLinia(const Adresat &wybranyAdresat) {
+    string daneAdresataTekst = "";
+
+    daneAdresataTekst += (to_string(wybranyAdresat.idAdresata) + "|");
+    daneAdresataTekst += (to_string(wybranyAdresat.idPrzypisanegoUzytkownika) + "|");
+    daneAdresataTekst += (wybranyAdresat.imie + "|");
+    daneAdresataTekst += (wybranyAdresat.nazwisko + "|");
+    daneAdresataTekst += (wybranyAdresat.numerTelefonu + "|");
+    daneAdresataTekst += (wybranyAdresat.email + "|");
+    daneAdresataTekst += (wybranyAdresat.adres + "|");
+
+    return daneAdresataTekst;
+}
+
+bool zapiszAdresataDoPlikuTekstowego(const Adresat &zapisywanyAdresat) {
+    fstream plikListaAdresatow;
+
+    plikListaAdresatow.open("Adresaci.txt", ios::out | ios::app);
+
+    if (plikListaAdresatow.good()) {
+        plikListaAdresatow << daneAdresataJednaLinia(zapisywanyAdresat) << endl;
+        plikListaAdresatow.close();
+        return true;
+    } else {
+        cout << "Nie udalo sie otworzyc pliku i zapisac w nim danych." << endl;
+        wstrzymajProgram();
+        return false;
+    }
+}
+
+Adresat wczytajDaneNowegoAdresata(const int idZalogowanegoUzytkownika, const int idOstatniegoAdresata) {
+    system("cls");
+    Adresat nowyAdresat;
+
+    nowyAdresat.idAdresata = idOstatniegoAdresata + 1;
+    nowyAdresat.idPrzypisanegoUzytkownika = idZalogowanegoUzytkownika;
+
+    cout << "\t< DODAJ ADRESATA >" << endl;
+    cout << "----------------------------------" << endl << endl;
+    cout << "Numer ID adresata:\t\t" << nowyAdresat.idAdresata << endl;
+
+    nowyAdresat.imie = wczytajTekstDozwoloneZnaki("Podaj imie:\t\t\t");
+    nowyAdresat.nazwisko = wczytajTekstDozwoloneZnaki("Podaj nazwisko:\t\t\t");
+    nowyAdresat.numerTelefonu = wczytajTekstDozwoloneZnaki("Podaj numer telefonu:\t\t");
+    nowyAdresat.email = wczytajTekstDozwoloneZnaki("Podaj adres email:\t\t");
+    nowyAdresat.adres = wczytajTekstDozwoloneZnaki("Podaj adres zamieszkania:\t\t");
+
+    return nowyAdresat;
+}
+
+int pobierzIdOstatniegoAdresata() {
+    int idOstatniegoAdresata = 0;
+    string wczytanaLinia = "", ostatniaLinia = "";
+    fstream plikListaAdresatow;
+    Adresat wczytanyAdresat;
+
+    plikListaAdresatow.open("Adresaci.txt", ios::in);
+
+    if (plikListaAdresatow.good()) {
+        while (getline(plikListaAdresatow, wczytanaLinia)) {
+            if(!wczytanaLinia.empty())
+                ostatniaLinia = wczytanaLinia;
+        }
+        wczytanyAdresat = przypiszDaneAdresatowi(ostatniaLinia);
+        idOstatniegoAdresata = wczytanyAdresat.idAdresata;
+    }
+
+    plikListaAdresatow.close();
+
+    return idOstatniegoAdresata;
+}
+
+void dodajAdresata(vector <Adresat> &adresaci, const int idZalogowanegoUzytkownika) {
+    int idOstatniegoAdresata = 0;
+    Adresat nowyAdresat;
+
+    idOstatniegoAdresata = pobierzIdOstatniegoAdresata();
+    nowyAdresat = wczytajDaneNowegoAdresata(idZalogowanegoUzytkownika, idOstatniegoAdresata);
+
+    if(!czyAdresatJuzIstnieje(adresaci, nowyAdresat)) {
+        if(zapiszAdresataDoPlikuTekstowego(nowyAdresat)) {
+            adresaci.emplace_back(nowyAdresat);
+            cout << endl << "Adresat zostal dodany do listy kontaktow." << endl;
+            wstrzymajProgram();
+        }
+    }
 }
 
 void wyszukajAdresataPoImieniu()    {
@@ -164,7 +286,7 @@ int idZalogowanegoUzytkownika = 1;        // wpisz ID. Docelowo bedzie generowan
 
         switch (wyborUzytkownika) {
             case 1:
-                dodajAdresata();
+                dodajAdresata(adresaci, idZalogowanegoUzytkownika);
                 break;
             case 2:
                 wyszukajAdresataPoImieniu();
